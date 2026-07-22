@@ -33,6 +33,37 @@
     </div>
   </section>
 
+  <section id="tab-ranking" hidden>
+    <div class="search-controls">
+      <select id="rk-course">
+        <option value="ALL">全コース通算</option>
+      </select>
+      <div class="filter-grid">
+        <select id="rk-type">
+          <option value="jockey">騎手</option>
+          <option value="trainer">調教師</option>
+        </select>
+        <select id="rk-sort">
+          <option value="win_pct">勝率順</option>
+          <option value="place_pct">複勝率順</option>
+          <option value="win_roi">単勝回収率順</option>
+          <option value="place_roi">複勝回収率順</option>
+          <option value="n">騎乗数順</option>
+        </select>
+        <select id="rk-minn">
+          <option value="5">最低5走以上</option>
+          <option value="10" selected>最低10走以上</option>
+          <option value="20">最低20走以上</option>
+          <option value="30">最低30走以上</option>
+          <option value="50">最低50走以上</option>
+        </select>
+      </div>
+    </div>
+    <div class="search-summary" id="rk-summary"></div>
+    <p class="empty-note" style="padding:6px 2px; text-align:left;">※回収率は単勝/複勝100円払い戻しベースの過去実績です。サンプル数が少ない条件は偶然の影響が大きいので「最低○走以上」を上げて確認してください。</p>
+    <div class="entry-list" id="rk-results"></div>
+  </section>
+
   <section id="tab-search" hidden>
     <div class="search-controls">
       <select id="sel-course"><option value="">コースを選択してください</option></select>
@@ -77,6 +108,7 @@
 
 <nav class="tabbar">
   <button data-tab="overview" class="active"><span class="ic">&#9678;</span>コース一覧</button>
+  <button data-tab="ranking"><span class="ic">&#9873;</span>ランキング</button>
   <button data-tab="search"><span class="ic">&#9737;</span>データ検索</button>
 </nav>
 
