@@ -1,0 +1,215 @@
+/* ==========================================================
+   中京競馬 攻略データベース ー 電光掲示板テーマ
+   Turf(芝)=モスグリーン / Dirt(ダート)=クレイオレンジ
+   数値はアンバーLEDの発光風に見せる
+   ========================================================== */
+
+:root{
+  --bg:        #12181B;
+  --panel:     #1B2327;
+  --panel-2:   #212B30;
+  --line:      #33403F;
+  --turf:      #3E7C59;
+  --turf-soft: #2C5A41;
+  --dirt:      #B3703B;
+  --dirt-soft: #8A5429;
+  --amber:     #FFB020;
+  --amber-dim: #8A6320;
+  --text:      #F1EDE4;
+  --text-mute: #8FA0A3;
+  --danger:    #D9694F;
+  --radius: 10px;
+}
+
+*{ box-sizing: border-box; }
+html,body{ margin:0; padding:0; }
+
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Noto Sans JP", "Hiragino Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: 76px; /* タブバー分 */
+}
+
+h1,h2,h3, .disp{
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-weight: 700;
+  letter-spacing: .02em;
+  margin: 0;
+}
+
+.num{
+  font-family: "Zen Kaku Gothic New", sans-serif;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--amber);
+  text-shadow: 0 0 8px rgba(255,176,32,.35);
+}
+
+/* ---------- ヒーロー ---------- */
+.hero{
+  padding: 22px 16px 18px;
+  background:
+    linear-gradient(180deg, rgba(255,176,32,.06), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px),
+    var(--panel);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+}
+.hero .eyebrow{
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: .18em;
+  border: 1px solid var(--amber-dim);
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+.hero h1{
+  font-size: 22px;
+  line-height: 1.4;
+}
+.hero .ticker{
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,.25);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 13.5px;
+  color: var(--text-mute);
+  min-height: 40px;
+  display:flex;
+  align-items:center;
+}
+.hero .ticker b{ color: var(--amber); font-weight:700; }
+.hero .ticker .dot{
+  display:inline-block; width:6px;height:6px;border-radius:50%;
+  background: var(--amber); margin-right:8px; flex:0 0 auto;
+  box-shadow:0 0 6px var(--amber);
+}
+@media (prefers-reduced-motion: no-preference){
+  .hero .ticker-inner{ animation: fadeswap .3s ease; }
+}
+@keyframes fadeswap{ from{ opacity:0; transform: translateY(3px);} to{opacity:1; transform:none;} }
+
+/* ---------- タブバー(下部固定) ---------- */
+.tabbar{
+  position: fixed; left:0; right:0; bottom:0;
+  display:flex; height:60px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  z-index: 40;
+}
+.tabbar button{
+  flex:1; background:none; border:none; color: var(--text-mute);
+  font-family: "Zen Kaku Gothic New", sans-serif; font-weight:700; font-size:12.5px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+}
+.tabbar button .ic{ font-size:18px; }
+.tabbar button.active{ color: var(--amber); }
+.tabbar button.active .ic{ filter: drop-shadow(0 0 6px rgba(255,176,32,.5)); }
+
+main{ padding: 14px 12px 20px; max-width: 720px; margin: 0 auto; }
+
+/* ---------- フィルター行 ---------- */
+.filter-row{ display:flex; gap:8px; margin-bottom: 12px; flex-wrap:wrap; }
+.chip-toggle{
+  border: 1px solid var(--line); background: var(--panel);
+  color: var(--text-mute); border-radius: 20px; padding: 7px 14px;
+  font-size: 13px; font-weight:700; font-family:"Zen Kaku Gothic New",sans-serif;
+}
+.chip-toggle.active{ background: var(--amber); color:#181008; border-color: var(--amber); }
+.searchbox{
+  flex:1; min-width: 140px;
+  background: var(--panel); border:1px solid var(--line); border-radius:20px;
+  color: var(--text); padding: 7px 14px; font-size: 13px;
+}
+.searchbox::placeholder{ color: var(--text-mute); }
+
+/* ---------- コースカード ---------- */
+.course-grid{ display:flex; flex-direction:column; gap:10px; }
+.course-card{
+  background: var(--panel); border:1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; position:relative; overflow:hidden;
+}
+.course-card::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
+}
+.course-card.surface-芝::before{ background: var(--turf); }
+.course-card.surface-ダ::before{ background: var(--dirt); }
+
+.course-card .top-row{ display:flex; justify-content:space-between; align-items:baseline; }
+.course-card h3{ font-size: 16.5px; }
+.course-card .n{ font-size: 11.5px; color: var(--text-mute); }
+.course-card .badges{ display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.badge{
+  font-size: 11.5px; padding: 3px 8px; border-radius: 6px;
+  background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+}
+.badge.pace-slow{ color:#8FC2FF; border-color:#2C4A66; }
+.badge.pace-fast{ color:#FF9E85; border-color:#663526; }
+.course-card .note{ margin-top: 8px; font-size: 12.5px; color: var(--text-mute); line-height:1.5; }
+.course-card .note b{ color: var(--text); }
+.course-card .detail-btn{
+  margin-top:10px; width:100%; background:none; border:1px solid var(--amber-dim);
+  color: var(--amber); border-radius: 6px; padding: 7px 0; font-weight:700; font-size:12.5px;
+  font-family:"Zen Kaku Gothic New",sans-serif;
+}
+
+/* ---------- モーダル(コース詳細) ---------- */
+.modal{
+  position: fixed; inset:0; background: rgba(0,0,0,.65); z-index: 60;
+  display:flex; align-items:flex-end;
+}
+.modal .sheet{
+  background: var(--bg); width:100%; max-height: 88vh; overflow-y:auto;
+  border-radius: 16px 16px 0 0; padding: 16px 16px 28px; border-top: 1px solid var(--line);
+}
+.modal .sheet-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px; }
+.modal .close-btn{ background:none; border:1px solid var(--line); color:var(--text-mute); border-radius:6px; padding:4px 10px; font-size:12px;}
+.stat-table{ width:100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 13px; }
+.stat-table th,.stat-table td{ border-bottom:1px solid var(--line); padding:6px 4px; text-align:right; }
+.stat-table th:first-child, .stat-table td:first-child{ text-align:left; color: var(--text-mute); }
+.stat-table td.num, .stat-table th.num{ color: var(--amber); font-family:"Zen Kaku Gothic New",sans-serif; font-weight:700; }
+.section-label{ font-size:12px; color: var(--text-mute); letter-spacing:.08em; margin: 14px 0 2px; text-transform:uppercase; }
+.takeaway-list{ list-style:none; padding:0; margin:6px 0 0; display:flex; flex-direction:column; gap:6px; }
+.takeaway-list li{
+  font-size: 13px; background: var(--panel); border:1px solid var(--line); border-radius:8px;
+  padding: 8px 10px; line-height:1.5;
+}
+.takeaway-list li::before{ content:"▸ "; color: var(--amber); }
+
+/* ---------- 検索タブ ---------- */
+.search-controls{ display:flex; flex-direction:column; gap:8px; margin-bottom: 10px; }
+.search-controls select, .search-controls input{
+  background: var(--panel); border:1px solid var(--line); color: var(--text);
+  border-radius: 8px; padding: 9px 10px; font-size: 13.5px; width:100%;
+}
+.filter-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+.search-summary{ font-size: 12.5px; color: var(--text-mute); margin: 4px 2px 10px; }
+.entry-list{ display:flex; flex-direction:column; gap:6px; }
+.entry-row{
+  background: var(--panel); border:1px solid var(--line); border-radius:8px;
+  padding: 8px 10px; font-size: 12.5px; display:flex; flex-direction:column; gap:3px;
+}
+.entry-row .line1{ display:flex; justify-content:space-between; color: var(--text-mute); font-size:11px; }
+.entry-row .line2{ display:flex; justify-content:space-between; align-items:baseline; }
+.entry-row .horse{ font-weight:700; font-size: 13.5px; }
+.entry-row .finish{ font-family:"Zen Kaku Gothic New",sans-serif; font-weight:700; }
+.entry-row .finish.win{ color: var(--amber); }
+.entry-row .tags{ display:flex; gap:5px; margin-top:2px; }
+.entry-row .tag{ font-size:10.5px; padding:1px 6px; border-radius:4px; background:var(--panel-2); color:var(--text-mute); }
+
+.more-btn{
+  width:100%; margin-top:10px; padding:11px 0; border-radius:8px;
+  background: var(--panel); border:1px solid var(--line); color: var(--text);
+  font-weight:700; font-family:"Zen Kaku Gothic New",sans-serif;
+}
+
+.empty-note{ text-align:center; color: var(--text-mute); padding: 30px 10px; font-size:13px; }
+.loading-note{ text-align:center; color: var(--text-mute); padding: 20px 10px; font-size:13px; }
+
+.low-sample-flag{ color: var(--danger); font-size:11px; }
