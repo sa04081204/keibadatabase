@@ -60,6 +60,13 @@ git commit -m "データ更新"
 git push
 ```
 
+### キャッシュに注意
+
+`index.html`が読み込む`assets/style.css`と`assets/app.js`には `?v=3` のようなバージョン番号を付けています。
+HTML・CSS・JSを更新したのに反映されない場合は、この番号を1つ上げてください（`index.html`内の2箇所、
+および`assets/app.js`先頭の`DATA_VERSION`）。番号を上げないと、ファイルごとにブラウザ/GitHubのキャッシュの
+新旧がズレて、例えば「HTMLは新しいのにJSだけ古い」状態になり、タブ切り替えなどが正しく動かなくなることがあります。
+
 ## フォルダ構成
 
 ```
