@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const DATA_VERSION = "v5"; // データ更新のたびに数字を上げるとキャッシュを確実に回避できる
+  const DATA_VERSION = "v7"; // データ更新のたびに数字を上げるとキャッシュを確実に回避できる
 
   const state = {
     courses: [],
@@ -224,6 +224,40 @@
       <table class="stat-table">
         <tr><th>4角番手</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>複勝回収率</th><th>N</th></tr>
         ${rateRows(c.corner4_band)}
+      </table>
+
+      <div class="section-label">開催日程別 成績（開催が進むほど馬場が変化）</div>
+      <table class="stat-table">
+        <tr><th>開催日程</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>複勝回収率</th><th>N</th></tr>
+        ${rateRows(c.kaisai_band)}
+      </table>
+
+      <div class="section-label">性別・年齢別 成績</div>
+      <table class="stat-table">
+        <tr><th>性別</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>複勝回収率</th><th>N</th></tr>
+        ${rateRows(c.sex)}
+      </table>
+      <table class="stat-table">
+        <tr><th>年齢</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>複勝回収率</th><th>N</th></tr>
+        ${rateRows(c.age)}
+      </table>
+
+      <div class="section-label">距離変化別 成績（前走からの延長・短縮）</div>
+      <table class="stat-table">
+        <tr><th>距離変化</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>複勝回収率</th><th>N</th></tr>
+        ${rateRows(c.distance_change)}
+      </table>
+
+      <div class="section-label">間隔別 成績（前走からのローテーション）</div>
+      <table class="stat-table">
+        <tr><th>間隔</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>複勝回収率</th><th>N</th></tr>
+        ${rateRows(c.interval)}
+      </table>
+
+      <div class="section-label">中京経験別 成績</div>
+      <table class="stat-table">
+        <tr><th>中京経験</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>複勝回収率</th><th>N</th></tr>
+        ${rateRows(c.chukyo_experience)}
       </table>
 
       <div class="section-label">クロス条件分析（2要素の掛け合わせ／N${best.minN}以上）</div>
