@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const DATA_VERSION = "v7"; // データ更新のたびに数字を上げるとキャッシュを確実に回避できる
+  const DATA_VERSION = "v8"; // データ更新のたびに数字を上げるとキャッシュを確実に回避できる
 
   const state = {
     courses: [],
@@ -20,14 +20,20 @@
 
   // ---------------- 初期化 ----------------
   async function init() {
-    const res = await fetch(`data/courses.json?${DATA_VERSION}`);
-    const data = await res.json();
-    state.courses = data.courses;
+    try {
+      const res = await fetch(`data/courses.json?${DATA_VERSION}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      state.courses = data.courses;
 
-    renderCourseList();
-    buildCourseSelect();
-    buildRankingCourseSelect();
-    startTicker();
+      renderCourseList();
+      buildCourseSelect();
+      buildRankingCourseSelect();
+      startTicker();
+    } catch (err) {
+      el("#course-list").innerHTML = `<div class="empty-note">データの読み込みに失敗しました（${err.message}）。data/courses.jsonが正しくアップロードされているか確認してください。</div>`;
+    }
+    // タブ切替や検索欄の動作は、データ取得の成否に関わらず有効にしておく
     bindTabs();
     bindFilters();
     bindSearchControls();
@@ -340,11 +346,17 @@
     el("#rk-summary").textContent = "読み込み中…";
     el("#rk-results").innerHTML = "";
 
-    if (!state.rankingCache[key]) {
-      const res = await fetch(`data/rankings/${encodeURIComponent(key)}.json?${DATA_VERSION}`);
-      state.rankingCache[key] = await res.json();
+    try {
+      if (!state.rankingCache[key]) {
+        const res = await fetch(`data/rankings/${encodeURIComponent(key)}.json?${DATA_VERSION}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        state.rankingCache[key] = await res.json();
+      }
+      renderRanking(state.rankingCache[key]);
+    } catch (err) {
+      el("#rk-summary").textContent = "";
+      el("#rk-results").innerHTML = `<div class="empty-note">データの読み込みに失敗しました（${err.message}）。data/rankings/フォルダが正しくアップロードされているか確認してください。</div>`;
     }
-    renderRanking(state.rankingCache[key]);
   }
 
   function renderRanking(data) {
@@ -412,13 +424,19 @@
     resultsBox.innerHTML = "";
     el("#more-btn").hidden = true;
 
-    if (!state.entriesCache[key]) {
-      const res = await fetch(`data/entries/${encodeURIComponent(key)}.json?${DATA_VERSION}`);
-      state.entriesCache[key] = await res.json();
+    try {
+      if (!state.entriesCache[key]) {
+        const res = await fetch(`data/entries/${encodeURIComponent(key)}.json?${DATA_VERSION}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        state.entriesCache[key] = await res.json();
+      }
+      const { columns, rows } = state.entriesCache[key];
+      state.searchRows = rows.map((r) => Object.fromEntries(columns.map((c, i) => [c, r[i]])));
+      applyFilters();
+    } catch (err) {
+      el("#search-summary").textContent = "";
+      resultsBox.innerHTML = `<div class="empty-note">データの読み込みに失敗しました（${err.message}）。data/entries/フォルダが正しくアップロードされているか確認してください。</div>`;
     }
-    const { columns, rows } = state.entriesCache[key];
-    state.searchRows = rows.map((r) => Object.fromEntries(columns.map((c, i) => [c, r[i]])));
-    applyFilters();
   }
 
   function applyFilters() {
