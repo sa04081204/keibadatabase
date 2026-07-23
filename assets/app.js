@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const DATA_VERSION = "v8"; // データ更新のたびに数字を上げるとキャッシュを確実に回避できる
+  const DATA_VERSION = "v9"; // データ更新のたびに数字を上げるとキャッシュを確実に回避できる
 
   const state = {
     courses: [],
