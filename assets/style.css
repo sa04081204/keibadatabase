@@ -183,6 +183,22 @@ main{ padding: 14px 12px 20px; max-width: 720px; margin: 0 auto; }
 }
 .takeaway-list li::before{ content:"▸ "; color: var(--amber); }
 
+.cross-block{ margin-bottom: 10px; }
+.cross-head{
+  font-size: 12.5px; font-weight:700; font-family:"Zen Kaku Gothic New",sans-serif;
+  padding: 4px 0; margin-bottom: 4px;
+}
+.cross-head.good{ color: var(--amber); }
+.cross-head.bad{ color: var(--danger); }
+.cross-row{
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  background: var(--panel); border:1px solid var(--line); border-radius:8px;
+  padding: 8px 10px; font-size: 12px; margin-bottom: 5px; flex-wrap:wrap;
+}
+.cross-row .cross-label{ font-weight:700; font-size:13px; }
+.cross-row .cross-nums{ color: var(--text-mute); font-size: 11.5px; }
+.cross-row .cross-nums b{ color: var(--amber); font-family:"Zen Kaku Gothic New",sans-serif; }
+
 /* ---------- 検索タブ ---------- */
 .search-controls{ display:flex; flex-direction:column; gap:8px; margin-bottom: 10px; }
 .search-controls select, .search-controls input{

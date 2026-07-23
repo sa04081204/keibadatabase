@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const DATA_VERSION = "v3"; // データ更新のたびに数字を上げるとキャッシュを確実に回避できる
+  const DATA_VERSION = "v5"; // データ更新のたびに数字を上げるとキャッシュを確実に回避できる
 
   const state = {
     courses: [],
@@ -147,6 +147,32 @@
     `).join("");
   }
 
+  const CROSS_MIN_N = 20;
+
+  function pickCrosses(crosses, dir) {
+    // dir: "best" = ROI高い順 / "worst" = ROI低い順
+    let pool = (crosses || []).filter((c) => c.n >= CROSS_MIN_N && c.win_roi != null);
+    let minN = CROSS_MIN_N;
+    if (pool.length < 3) { // サンプルが少ないコースは基準を緩める
+      minN = 10;
+      pool = (crosses || []).filter((c) => c.n >= minN && c.win_roi != null);
+    }
+    pool = [...pool].sort((a, b) => dir === "best" ? b.win_roi - a.win_roi : a.win_roi - b.win_roi);
+    return { list: pool.slice(0, 5), minN };
+  }
+
+  function crossRows(list) {
+    if (!list.length) return `<div class="empty-note">条件を満たすデータがありません</div>`;
+    return list.map((c) => `
+      <div class="cross-row">
+        <span class="cross-label">${c.label}</span>
+        <span class="cross-nums">
+          単勝回収率<b>${c.win_roi}%</b>${c.win_roi > 300 ? ' <span class="low-sample-flag">※少数の高配当に偏っている可能性</span>' : ""}／勝率${c.win_pct}%／N=${c.n}
+        </span>
+      </div>
+    `).join("");
+  }
+
   function openModal(key) {
     const c = state.courses.find((x) => x.key === key);
     if (!c) return;
@@ -156,6 +182,9 @@
     const timeRows = Object.entries(c.time_by_cond || {}).map(([cond, v]) => `
       <tr><td>${cond}</td><td class="num">${v.avg_time}秒</td><td>${v.n}</td></tr>
     `).join("");
+
+    const best = pickCrosses(c.crosses, "best");
+    const worst = pickCrosses(c.crosses, "worst");
 
     sheet.innerHTML = `
       <div class="sheet-head">
@@ -184,6 +213,28 @@
         <tr><th>馬番</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>N</th></tr>
         ${umabanRows(c.umaban)}
       </table>
+
+      <div class="section-label">上がり3F順位別 成績（そのレースでの速さ順）</div>
+      <table class="stat-table">
+        <tr><th>上がり順位</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>複勝回収率</th><th>N</th></tr>
+        ${rateRows(c.agari)}
+      </table>
+
+      <div class="section-label">4角通過順位帯別 成績（絶対的な番手）</div>
+      <table class="stat-table">
+        <tr><th>4角番手</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>複勝回収率</th><th>N</th></tr>
+        ${rateRows(c.corner4_band)}
+      </table>
+
+      <div class="section-label">クロス条件分析（2要素の掛け合わせ／N${best.minN}以上）</div>
+      <div class="cross-block">
+        <div class="cross-head good">◎ 狙い目条件 TOP5</div>
+        ${crossRows(best.list)}
+      </div>
+      <div class="cross-block">
+        <div class="cross-head bad">△ 軽視・回避条件 TOP5</div>
+        ${crossRows(worst.list)}
+      </div>
 
       <div class="section-label">馬場状態別 勝ち時計</div>
       <table class="stat-table">
