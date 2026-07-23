@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  const DATA_VERSION = "v3"; // データ更新のたびに数字を上げるとキャッシュを確実に回避できる
+
   const state = {
     courses: [],
     surfaceFilter: "all",
@@ -10,6 +12,7 @@
     searchFiltered: [],
     page: 0,
     pageSize: 30,
+    rankingCache: {},    // key -> {jockey:[...], trainer:[...]}
   };
 
   const el = (sel) => document.querySelector(sel);
@@ -17,16 +20,18 @@
 
   // ---------------- 初期化 ----------------
   async function init() {
-    const res = await fetch("data/courses.json");
+    const res = await fetch(`data/courses.json?${DATA_VERSION}`);
     const data = await res.json();
     state.courses = data.courses;
 
     renderCourseList();
     buildCourseSelect();
+    buildRankingCourseSelect();
     startTicker();
     bindTabs();
     bindFilters();
     bindSearchControls();
+    bindRankingControls();
   }
 
   // ---------------- タブ切替 ----------------
@@ -36,8 +41,9 @@
         els(".tabbar button").forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         const tab = btn.dataset.tab;
-        el("#tab-overview").hidden = tab !== "overview";
-        el("#tab-search").hidden = tab !== "search";
+        ["overview", "ranking", "search"].forEach((t) => {
+          el(`#tab-${t}`).hidden = t !== tab;
+        });
       });
     });
   }
@@ -131,7 +137,13 @@
   // ---------------- コース詳細モーダル ----------------
   function rateRows(dict) {
     return Object.entries(dict).map(([k, v]) => `
-      <tr><td>${k}</td><td class="num">${v.win_pct ?? "-"}%</td><td>${v.place_pct ?? "-"}%</td><td>${v.n}</td></tr>
+      <tr><td>${k}</td><td class="num">${v.win_pct ?? "-"}%</td><td>${v.place_pct ?? "-"}%</td><td>${v.win_roi ?? "-"}%</td><td>${v.place_roi ?? "-"}%</td><td>${v.n}</td></tr>
+    `).join("");
+  }
+
+  function umabanRows(list) {
+    return (list || []).map((v) => `
+      <tr><td>${v.umaban}番</td><td class="num">${v.win_pct ?? "-"}%</td><td>${v.place_pct ?? "-"}%</td><td>${v.win_roi ?? "-"}%</td><td>${v.n}</td></tr>
     `).join("");
   }
 
@@ -157,14 +169,20 @@
 
       <div class="section-label">馬番ゾーン別 成績（内=下位1/3, 中=中位1/3, 外=上位1/3）</div>
       <table class="stat-table">
-        <tr><th>ゾーン</th><th class="num">勝率</th><th>複勝率</th><th>N</th></tr>
+        <tr><th>ゾーン</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>複勝回収率</th><th>N</th></tr>
         ${rateRows(c.post_zone)}
       </table>
 
       <div class="section-label">脚質別 成績</div>
       <table class="stat-table">
-        <tr><th>脚質</th><th class="num">勝率</th><th>複勝率</th><th>N</th></tr>
+        <tr><th>脚質</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>複勝回収率</th><th>N</th></tr>
         ${rateRows(c.style)}
+      </table>
+
+      <div class="section-label">馬番別 成績（実際の馬番ごと）</div>
+      <table class="stat-table">
+        <tr><th>馬番</th><th class="num">勝率</th><th>複勝率</th><th>単勝回収率</th><th>N</th></tr>
+        ${umabanRows(c.umaban)}
       </table>
 
       <div class="section-label">馬場状態別 勝ち時計</div>
@@ -175,10 +193,11 @@
 
       <div class="section-label">1番人気の信頼度</div>
       <table class="stat-table">
-        <tr><td>単勝1番人気 勝率</td><td class="num">${c.fav_win_pct ?? "-"}%</td></tr>
+        <tr><td>単勝1番人気 勝率／回収率</td><td class="num">${c.fav_win_pct ?? "-"}% ／ ${c.fav_roi ?? "-"}%</td></tr>
       </table>
 
       <button class="detail-btn" id="go-search-btn" style="margin-top:6px;">このコースの明細を検索する</button>
+      <button class="detail-btn" id="go-ranking-btn" style="margin-top:8px;">このコースの騎手・調教師ランキングを見る</button>
     `;
 
     el("#close-modal").addEventListener("click", closeModal);
@@ -187,6 +206,12 @@
       el('.tabbar button[data-tab="search"]').click();
       el("#sel-course").value = key;
       onCourseSelected(key);
+    });
+    el("#go-ranking-btn").addEventListener("click", () => {
+      closeModal();
+      el('.tabbar button[data-tab="ranking"]').click();
+      el("#rk-course").value = key;
+      loadAndRenderRanking();
     });
 
     modal.hidden = false;
@@ -198,6 +223,71 @@
   el("#modal").addEventListener("click", (e) => {
     if (e.target.id === "modal") closeModal();
   });
+
+  // ---------------- ランキングタブ ----------------
+  function buildRankingCourseSelect() {
+    const sel = el("#rk-course");
+    const bySurface = { "芝": [], "ダ": [] };
+    state.courses.forEach((c) => bySurface[c.surface].push(c));
+    ["芝", "ダ"].forEach((s) => {
+      if (!bySurface[s].length) return;
+      const og = document.createElement("optgroup");
+      og.label = s === "芝" ? "芝コース" : "ダートコース";
+      bySurface[s].forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c.key;
+        opt.textContent = c.label;
+        og.appendChild(opt);
+      });
+      sel.appendChild(og);
+    });
+  }
+
+  function bindRankingControls() {
+    ["#rk-course", "#rk-type", "#rk-sort", "#rk-minn"].forEach((id) => {
+      el(id).addEventListener("change", loadAndRenderRanking);
+    });
+    loadAndRenderRanking();
+  }
+
+  async function loadAndRenderRanking() {
+    const key = el("#rk-course").value;
+    el("#rk-summary").textContent = "読み込み中…";
+    el("#rk-results").innerHTML = "";
+
+    if (!state.rankingCache[key]) {
+      const res = await fetch(`data/rankings/${encodeURIComponent(key)}.json?${DATA_VERSION}`);
+      state.rankingCache[key] = await res.json();
+    }
+    renderRanking(state.rankingCache[key]);
+  }
+
+  function renderRanking(data) {
+    const type = el("#rk-type").value;
+    const sortKey = el("#rk-sort").value;
+    const minN = parseInt(el("#rk-minn").value, 10);
+
+    let rows = (data[type] || []).filter((r) => r.n >= minN);
+    rows.sort((a, b) => (b[sortKey] ?? -Infinity) - (a[sortKey] ?? -Infinity));
+
+    el("#rk-summary").textContent = rows.length ? `${rows.length}名を表示（${minN}走以上）` : "該当するデータがありません";
+
+    const roiClass = (v) => (v == null ? "" : v >= 100 ? "win" : "");
+    el("#rk-results").innerHTML = rows.map((r, i) => `
+      <div class="entry-row">
+        <div class="line1"><span>#${i + 1}</span><span>N=${r.n}</span></div>
+        <div class="line2">
+          <span class="horse">${r.name}</span>
+          <span class="finish ${roiClass(r.win_roi)}">単勝回収率 ${r.win_roi ?? "-"}%</span>
+        </div>
+        <div class="tags">
+          <span class="tag">勝率 ${r.win_pct ?? "-"}%</span>
+          <span class="tag">複勝率 ${r.place_pct ?? "-"}%</span>
+          <span class="tag">複勝回収率 ${r.place_roi ?? "-"}%</span>
+        </div>
+      </div>
+    `).join("") || `<div class="empty-note">該当するデータがありません</div>`;
+  }
 
   // ---------------- 検索タブ ----------------
   function buildCourseSelect() {
@@ -238,7 +328,7 @@
     el("#more-btn").hidden = true;
 
     if (!state.entriesCache[key]) {
-      const res = await fetch(`data/entries/${encodeURIComponent(key)}.json`);
+      const res = await fetch(`data/entries/${encodeURIComponent(key)}.json?${DATA_VERSION}`);
       state.entriesCache[key] = await res.json();
     }
     const { columns, rows } = state.entriesCache[key];
