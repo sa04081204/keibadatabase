@@ -28,6 +28,7 @@ import argparse
 import json
 import re
 import sys
+import time
 import unicodedata
 from datetime import datetime
 from pathlib import Path
@@ -59,7 +60,12 @@ WEIGHTS = {
     "trainer": 18,       # 調教師のコース別勝率・回収率
     "interval": 6,       # 間隔（休み明けかどうか）
     "distance_change": 6,  # 前走からの距離変化
+    "sire": 8,           # 種牡馬のコース別勝率・回収率(新規)
+    "prev_agari": 8,     # 前走の上がり3Fタイム(3分位バケット) × このコースの上がり3F傾向(新規、リークなし)
 }
+# 注: sire/prev_agariを足したことで合計が100→118になっている。
+# 既存8項目の相対的な重みは自動的に少し下がる(スコア計算はtotal_weightで正規化されるため)。
+# 全体の重み再配分(実測ベースへの見直し)はまだ未着手・別途要判断。
 
 
 # ---------------------------------------------------------------------------
@@ -215,23 +221,73 @@ def guess_style_from_corner(corner_pos, field_size):
     return "追込"
 
 
-def fetch_past_hint(horse_id):
-    """馬柱(5走)簡易版: 直近の距離・場所・4角通過順くらいを拾うベストエフォート取得。
-    取得できない・パースできない場合はNoneを返し、呼び出し側でそのままスキップする。
+def parse_corner_and_field_size(text_cells):
+    """通過欄("2-2-3-4"のような文字列)から最終コーナーの通過順位を、
+    頭数っぽい単独の整数セルから頭数を推測する（ベストエフォート・簡易版）。
+    ※netkeibaのHTML構造は要確認・要検証（このサンドボックスからは
+    db.netkeiba.comへ実際にアクセスして確認できないため、実レースIDで
+    一度動作確認してから使うことを推奨）。
+    """
+    corner_pos, field_size = None, None
+    corner_cell = next((c for c in text_cells if re.match(r"^\d{1,2}(-\d{1,2}){1,3}$", c)), None)
+    if corner_cell:
+        parts = corner_cell.split("-")
+        try:
+            corner_pos = int(parts[-1])  # 最後の数字=最終コーナー通過順位
+        except ValueError:
+            corner_pos = None
+    # 頭数: 2桁までの単独整数セルのうち、通過欄の各数字より大きいものを候補にする
+    int_cells = [int(c) for c in text_cells if re.match(r"^\d{1,2}$", c)]
+    if int_cells and corner_pos is not None:
+        candidates = [v for v in int_cells if v >= corner_pos]
+        if candidates:
+            field_size = max(candidates)
+    return corner_pos, field_size
+
+
+def parse_last3f(text_cells):
+    """上がり3Fタイム(前走時点で既に分かっている値。33.0〜45.9秒くらいのレンジで
+    斤量やオッズと混同しないようにする簡易ヒューリスティック)を拾う。"""
+    for c in text_cells:
+        if re.match(r"^(3[3-9]|4[0-5])\.\d$", c):
+            try:
+                return float(c)
+            except ValueError:
+                pass
+    return None
+
+
+def fetch_sire(soup):
+    """血統表(class名に'blood'を含むtable)の中で最初に出てくる馬リンクを父(種牡馬)とみなす。
+    ※これも簡易ヒューリスティック。netkeibaのHTML構造変更やレイアウト差異で
+    取れないことがあるが、その場合はNoneを返し、呼び出し側でsire評価をスキップするだけなので安全。"""
+    table = soup.find("table", class_=re.compile("blood", re.IGNORECASE))
+    if table is None:
+        return None
+    link = table.find("a", href=re.compile(r"/horse/"))
+    return clean_text(link) if link else None
+
+
+def fetch_horse_hint(horse_id):
+    """馬ごとのベストエフォート取得: ①直近1走の距離・日付・4角通過順・頭数・上がり3F、
+    ②血統表からの父(種牡馬)名。取得できない・パースできない項目はNoneのまま返し、
+    呼び出し側でその項目だけスコア計算をスキップする(エラーにはしない)。
     """
     try:
         url = f"https://db.netkeiba.com/horse/{horse_id}/"
         html = fetch_html(url)
         soup = BeautifulSoup(html, "html.parser")
+        result = {"sire": fetch_sire(soup)}
+
         table = soup.find("table", class_=re.compile("db_h_race"))
         if table is None:
-            return None
+            return result
         rows = table.find_all("tr")[1:2]  # 直近1走のみ使う（簡易版）
         if not rows:
-            return None
+            return result
         tds = rows[0].find_all("td")
         text_cells = [clean_text(td) for td in tds]
-        result = {"raw": text_cells}
+        result["raw"] = text_cells
 
         # 日付(先頭セル想定)
         date_cell = next((c for c in text_cells if re.match(r"\d{4}/\d{2}/\d{2}", c)), None)
@@ -244,6 +300,11 @@ def fetch_past_hint(horse_id):
             dm = re.match(r"^(芝|ダ)(\d{3,4})", dist_cell)
             result["surface"] = dm.group(1)
             result["distance"] = int(dm.group(2))
+
+        corner_pos, field_size = parse_corner_and_field_size(text_cells)
+        result["corner_pos"] = corner_pos
+        result["field_size"] = field_size
+        result["last3f"] = parse_last3f(text_cells)
 
         return result
     except Exception:
@@ -297,6 +358,13 @@ def blend_courses(ca, cb):
                 out[k] = va or vb
         return out
 
+    bins_a, bins_b = ca.get("prev_agari_bins"), cb.get("prev_agari_bins")
+    if bins_a and bins_b:
+        na, nb = ca["n_races"], cb["n_races"]
+        blended_bins = [round((a * na + b * nb) / (na + nb), 2) for a, b in zip(bins_a, bins_b)]
+    else:
+        blended_bins = bins_a or bins_b
+
     return {
         "key": f"{ca['key']}+{cb['key']}",
         "label": ca["label"].replace("(A)", "") + "(A/B加重平均)",
@@ -309,6 +377,8 @@ def blend_courses(ca, cb):
         "age": blend_dict(ca["age"], cb["age"]),
         "interval": blend_dict(ca["interval"], cb["interval"]),
         "distance_change": blend_dict(ca["distance_change"], cb["distance_change"]),
+        "prev_agari": blend_dict(ca.get("prev_agari", {}), cb.get("prev_agari", {})),
+        "prev_agari_bins": blended_bins,
     }
 
 
@@ -359,6 +429,22 @@ def pct_score(dict_, key_, min_n=5):
     if not entry or entry.get("n", 0) < min_n or entry.get("win_pct") is None:
         return None
     return entry["win_pct"]
+
+
+PREV_AGARI_CATEGORIES = ["上がり速いタイプ(上位33%)", "平均的", "上がり遅いタイプ(下位33%)"]
+
+
+def bucket_prev_agari(last3f, bins):
+    """courses.jsonに保存されたbin境界値(analyze_chukyo.pyのprev_agari_bucket_and_binsと
+    同じ基準)を使って、新しい馬の前走上がり3Fタイムを3分位カテゴリに分類する。
+    binsが無い(そのコースはサンプル不足で分位点を作れなかった)場合はNoneを返す。"""
+    if last3f is None or not bins or len(bins) != 4:
+        return None
+    if last3f <= bins[1]:
+        return PREV_AGARI_CATEGORIES[0]
+    if last3f <= bins[2]:
+        return PREV_AGARI_CATEGORIES[1]
+    return PREV_AGARI_CATEGORIES[2]
 
 
 def rank_normalize(raw_scores):
@@ -465,6 +551,24 @@ def build_prediction(meta, horses, course, ranking, past_hints):
         v = pct_score(course.get("distance_change"), dist_change_band) if course else None
         factor_raw["distance_change"][i] = v
 
+        sire_name = hint.get("sire") if hint else None
+        sire_entry = find_ranking_entry(sire_name, ranking.get("sire", [])) if sire_name else None
+        v = None
+        if sire_entry and sire_entry.get("n", 0) >= 5:
+            v = sire_entry["win_pct"]
+            reasoning[i].append(
+                f"種牡馬{sire_entry['name']}は当コース勝率{sire_entry['win_pct']}%"
+                f"（単勝回収率{sire_entry['win_roi']}%, N={sire_entry['n']}）"
+            )
+        factor_raw["sire"][i] = v
+
+        prev_last3f = hint.get("last3f") if hint else None
+        agari_band = bucket_prev_agari(prev_last3f, course.get("prev_agari_bins")) if course else None
+        v = pct_score(course.get("prev_agari"), agari_band) if (course and agari_band) else None
+        factor_raw["prev_agari"][i] = v
+        if v is not None:
+            reasoning[i].append(f"前走の上がり3F傾向「{agari_band}」の当コース勝率 {v}%")
+
     factor_norm = {f: rank_normalize(raw) for f, raw in factor_raw.items()}
 
     total_weight = sum(WEIGHTS.values())
@@ -492,51 +596,43 @@ def build_prediction(meta, horses, course, ranking, past_hints):
 
 
 # ---------------------------------------------------------------------------
-# メイン
+# 1レース分の処理（バッチ実行でも使い回せるように関数化）
 # ---------------------------------------------------------------------------
-def main():
-    ap = argparse.ArgumentParser(description="netkeiba出馬表 × 中京コースデータ でルールベースAI予想を作る")
-    ap.add_argument("race_id", help="netkeibaのrace_id 例: 202607020101")
-    ap.add_argument("--data-dir", default="data", help="courses.json/rankingsのあるディレクトリ (既定: data)")
-    ap.add_argument("--variant", choices=["A", "B"], default=None, help="芝コースのA/Bが分かっている場合に指定")
-    ap.add_argument("--no-past", action="store_true", help="前走情報の取得をスキップ（速いが精度は落ちる）")
-    args = ap.parse_args()
-
-    data_dir = Path(args.data_dir)
+def process_one_race(race_id, data_dir, variant, no_past):
+    """1レース分を取得〜スコア計算〜保存まで行う。成功時はoutput dictを返す。"""
     out_dir = data_dir / "predictions"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"[1/4] netkeiba 出馬表を取得中... race_id={args.race_id}")
-    meta, horses = fetch_shutuba(args.race_id)
+    print(f"[1/4] netkeiba 出馬表を取得中... race_id={race_id}")
+    meta, horses = fetch_shutuba(race_id)
     print(f"      レース: {meta.get('race_name')} / {meta.get('surface')}{meta.get('distance')}m / {len(horses)}頭")
 
     if meta.get("surface") is None or meta.get("distance") is None:
-        print("エラー: コース情報(芝/ダ・距離)を取得できませんでした。中京以外のレースの可能性があります。", file=sys.stderr)
-        sys.exit(1)
+        raise RuntimeError("コース情報(芝/ダ・距離)を取得できませんでした。中京以外のレースの可能性があります。")
 
     past_hints = {}
-    if not args.no_past:
+    if not no_past:
         print("[2/4] 前走情報を取得中(馬ごと)... ※対応表がない場合はスキップされます")
         for h in horses:
             if h["horse_id"]:
-                hint = fetch_past_hint(h["horse_id"])
+                hint = fetch_horse_hint(h["horse_id"])
                 if hint:
                     past_hints[h["horse_id"]] = hint
+                time.sleep(0.4)  # db.netkeiba.comへの連続アクセスを避ける
     else:
         print("[2/4] --no-past 指定のため前走情報の取得をスキップ")
 
     print("[3/4] コースデータと照合してスコア計算中...")
-    course, key = load_course(data_dir, meta["surface"], meta["distance"], args.variant)
+    course, key = load_course(data_dir, meta["surface"], meta["distance"], variant)
     if course is None:
-        print(f"エラー: コースデータが見つかりません(key={key})。data/courses.jsonの中身を確認してください。", file=sys.stderr)
-        sys.exit(1)
+        raise RuntimeError(f"コースデータが見つかりません(key={key})。data/courses.jsonの中身を確認してください。")
     ranking = load_ranking(data_dir, key)
 
     results = build_prediction(meta, horses, course, ranking, past_hints)
 
     print("[4/4] 結果を保存中...")
     output = {
-        "race_id": args.race_id,
+        "race_id": race_id,
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "race_name": meta.get("race_name"),
         "surface": meta.get("surface"),
@@ -547,30 +643,106 @@ def main():
         "disclaimer": "過去データの傾向をルールベースで点数化した参考情報です。実際の着順を保証するものではありません。",
         "results": results,
     }
-    (out_dir / f"{args.race_id}.json").write_text(
+    (out_dir / f"{race_id}.json").write_text(
         json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-
-    index_path = out_dir / "index.json"
-    index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else {"races": []}
-    index["races"] = [r for r in index["races"] if r["race_id"] != args.race_id]
-    index["races"].append({
-        "race_id": args.race_id,
-        "race_name": meta.get("race_name"),
-        "surface": meta.get("surface"),
-        "distance": meta.get("distance"),
-        "start_time": meta.get("start_time"),
-        "generated_at": output["generated_at"],
-    })
-    index["races"].sort(key=lambda r: r["race_id"])
-    index_path.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"\n=== {meta.get('race_name')} ({meta.get('surface')}{meta.get('distance')}m) AI予想スコア ===")
     print(f"{'順位':>4} {'馬番':>4} {'馬名':<14} {'騎手':<8} {'score':>6}")
     for r in results:
         print(f"{r['rank']:>4} {r['umaban'] or '-':>4} {r['horse_name']:<14} {r['jockey']:<8} {r['score']:>6}")
-    print(f"\n保存先: {out_dir / f'{args.race_id}.json'}")
-    print("サイトに反映するには data/predictions を git add / commit / push してください。")
+    print()
+    return output
+
+
+def update_index(data_dir, outputs):
+    """複数レース分のoutputをまとめてdata/predictions/index.jsonへ反映する。"""
+    out_dir = data_dir / "predictions"
+    index_path = out_dir / "index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else {"races": []}
+    done_ids = {o["race_id"] for o in outputs}
+    index["races"] = [r for r in index["races"] if r["race_id"] not in done_ids]
+    for o in outputs:
+        index["races"].append({
+            "race_id": o["race_id"],
+            "race_name": o.get("race_name"),
+            "surface": o.get("surface"),
+            "distance": o.get("distance"),
+            "start_time": o.get("start_time"),
+            "generated_at": o.get("generated_at"),
+        })
+    index["races"].sort(key=lambda r: r["race_id"])
+    index_path.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def parse_race_numbers(spec):
+    """'1-12' や '1,3,5' や '1-5,9,11-12' を [1,2,...] のリストに展開する。"""
+    nums = []
+    for part in spec.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            a, b = part.split("-")
+            nums.extend(range(int(a), int(b) + 1))
+        else:
+            nums.append(int(part))
+    return nums
+
+
+# ---------------------------------------------------------------------------
+# メイン
+# ---------------------------------------------------------------------------
+def main():
+    ap = argparse.ArgumentParser(description="netkeiba出馬表 × 中京コースデータ でルールベースAI予想を作る")
+    ap.add_argument("race_ids", nargs="*", help="race_id（複数指定可）例: 202607020101 202607020102 ...")
+    ap.add_argument("--day", help="開催日コード(先頭10桁 例:2026070201)を指定すると--racesで指定したR数を一括処理する")
+    ap.add_argument("--races", default="1-12", help="--day指定時に処理するレース番号 例:1-12 / 1,3,5 / 1-6,9 (既定:1-12)")
+    ap.add_argument("--data-dir", default="data", help="courses.json/rankingsのあるディレクトリ (既定: data)")
+    ap.add_argument("--variant", choices=["A", "B"], default=None, help="芝コースのA/Bが分かっている場合に指定")
+    ap.add_argument("--no-past", action="store_true", help="前走情報の取得をスキップ（速いが精度は落ちる）")
+    args = ap.parse_args()
+
+    # 処理対象のrace_idリストを組み立てる
+    race_id_list = list(args.race_ids)
+    if args.day:
+        for n in parse_race_numbers(args.races):
+            race_id_list.append(f"{args.day}{n:02d}")
+
+    if not race_id_list:
+        print("エラー: race_idを1つ以上指定するか、--day で開催日を指定してください。\n"
+              "  例1) python tools/predict_race.py 202607020101\n"
+              "  例2) python tools/predict_race.py --day 2026070201 --races 1-12", file=sys.stderr)
+        sys.exit(1)
+
+    data_dir = Path(args.data_dir)
+    outputs = []
+    failed = []
+    is_batch = len(race_id_list) > 1
+
+    for idx, race_id in enumerate(race_id_list):
+        print(f"\n########## ({idx + 1}/{len(race_id_list)}) race_id={race_id} ##########")
+        try:
+            output = process_one_race(race_id, data_dir, args.variant, args.no_past)
+            outputs.append(output)
+        except Exception as e:  # 1レース失敗しても他のレースは続行する
+            print(f"エラー: race_id={race_id} の処理に失敗しました: {e}", file=sys.stderr)
+            failed.append((race_id, str(e)))
+        if is_batch and idx < len(race_id_list) - 1:
+            time.sleep(1.5)  # netkeibaへの連続アクセスを避けるインターバル
+
+    if outputs:
+        update_index(data_dir, outputs)
+
+    print("\n================ 完了 ================")
+    print(f"成功: {len(outputs)}件 / 失敗: {len(failed)}件")
+    if failed:
+        print("失敗したrace_id:")
+        for rid, err in failed:
+            print(f"  - {rid}: {err}")
+    if outputs:
+        print(f"\n保存先: {data_dir / 'predictions'}/ （各race_id.json + index.json）")
+        print("サイトに反映するには data/predictions を git add / commit / push してください。")
 
 
 if __name__ == "__main__":

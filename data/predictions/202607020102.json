@@ -1,0 +1,385 @@
+{
+  "race_id": "202607020102",
+  "generated_at": "2026-07-24T10:33:52",
+  "race_name": "",
+  "surface": "芝",
+  "distance": 1400,
+  "course_key": "shiba1400_A+shiba1400_B(加重平均・要確認)",
+  "start_time": "10:10",
+  "field_size": 13,
+  "disclaimer": "過去データの傾向をルールベースで点数化した参考情報です。実際の着順を保証するものではありません。",
+  "results": [
+    {
+      "umaban": 1,
+      "waku": 1,
+      "horse_name": "エアロクリスタ",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 55.0,
+      "jockey": "松山 弘平",
+      "trainer": "池添 学",
+      "score": 68.5,
+      "factor_scores": {
+        "post_zone": 100.0,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 51.7,
+        "trainer": 100.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「内」の当コース勝率 7.5%",
+        "騎手松山弘平は当コース勝率9.1%（複勝率27.3%, 単勝回収率44.4%, N=66）",
+        "調教師池添学は当コース勝率23.1%（単勝回収率70.4%, N=26）"
+      ],
+      "rank": 1
+    },
+    {
+      "umaban": 5,
+      "waku": 4,
+      "horse_name": "テーオーライガ",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 55.0,
+      "jockey": "団野 大成",
+      "trainer": "浜田 多実雄",
+      "score": 65.8,
+      "factor_scores": {
+        "post_zone": 100.0,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 54.0,
+        "trainer": 78.8,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「内」の当コース勝率 7.5%",
+        "騎手団野大成は当コース勝率9.5%（複勝率28.6%, 単勝回収率52.4%, N=42）",
+        "調教師浜田多実は当コース勝率18.2%（単勝回収率153.6%, N=11）"
+      ],
+      "rank": 2
+    },
+    {
+      "umaban": 4,
+      "waku": 4,
+      "horse_name": "リアルメッセージ",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 55.0,
+      "jockey": "城戸 義政",
+      "trainer": "小林 真也",
+      "score": 65.5,
+      "factor_scores": {
+        "post_zone": 100.0,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 100.0,
+        "trainer": 0.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「内」の当コース勝率 7.5%",
+        "騎手城戸義政は当コース勝率17.6%（複勝率17.6%, 単勝回収率168.8%, N=17）",
+        "調教師小林真也は当コース勝率0.0%（単勝回収率0.0%, N=6）"
+      ],
+      "rank": 3
+    },
+    {
+      "umaban": 2,
+      "waku": 2,
+      "horse_name": "タガノレクシア",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 55.0,
+      "jockey": "幸 英明",
+      "trainer": "鈴木 孝志",
+      "score": 63.4,
+      "factor_scores": {
+        "post_zone": 100.0,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 50.0,
+        "trainer": 69.7,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「内」の当コース勝率 7.5%",
+        "調教師鈴木孝志は当コース勝率16.1%（単勝回収率118.7%, N=31）"
+      ],
+      "rank": 4
+    },
+    {
+      "umaban": 11,
+      "waku": 7,
+      "horse_name": "ブレイクアウェイ",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 55.0,
+      "jockey": "岩田 望来",
+      "trainer": "上村 洋行",
+      "score": 57.1,
+      "factor_scores": {
+        "post_zone": 0.0,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 67.6,
+        "trainer": 100.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「外」の当コース勝率 5.7%",
+        "騎手岩田望来は当コース勝率11.9%（複勝率30.5%, 単勝回収率85.6%, N=59）",
+        "調教師上村洋行は当コース勝率23.1%（単勝回収率93.8%, N=13）"
+      ],
+      "rank": 5
+    },
+    {
+      "umaban": 3,
+      "waku": 3,
+      "horse_name": "コスモルミナ",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 55.0,
+      "jockey": "松若 風馬",
+      "trainer": "宮地 貴稔",
+      "score": 51.8,
+      "factor_scores": {
+        "post_zone": 100.0,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 17.0,
+        "trainer": 50.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「内」の当コース勝率 7.5%",
+        "騎手松若風馬は当コース勝率3.0%（複勝率22.4%, 単勝回収率18.5%, N=67）"
+      ],
+      "rank": 6
+    },
+    {
+      "umaban": 9,
+      "waku": 6,
+      "horse_name": "レッドレヴェリー",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 55.0,
+      "jockey": "富田 暁",
+      "trainer": "武 幸四郎",
+      "score": 51.2,
+      "factor_scores": {
+        "post_zone": 61.1,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 38.1,
+        "trainer": 50.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「中」の当コース勝率 6.8%",
+        "騎手富田暁は当コース勝率6.7%（複勝率13.3%, 単勝回収率39.3%, N=30）"
+      ],
+      "rank": 7
+    },
+    {
+      "umaban": 6,
+      "waku": 5,
+      "horse_name": "ヤマトデュノール",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 52.0,
+      "jockey": "森田 誠也",
+      "trainer": "安達 昭夫",
+      "score": 46.6,
+      "factor_scores": {
+        "post_zone": 61.1,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 50.0,
+        "trainer": 0.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「中」の当コース勝率 6.8%",
+        "調教師安達昭夫は当コース勝率0.0%（単勝回収率0.0%, N=15）"
+      ],
+      "rank": 8
+    },
+    {
+      "umaban": 10,
+      "waku": 7,
+      "horse_name": "ロンリーマン",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 54.0,
+      "jockey": "田山 旺佑",
+      "trainer": "荒川 義之",
+      "score": 42.2,
+      "factor_scores": {
+        "post_zone": 0.0,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 50.0,
+        "trainer": 33.3,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「外」の当コース勝率 5.7%",
+        "調教師荒川義之は当コース勝率7.7%（単勝回収率40.0%, N=26）"
+      ],
+      "rank": 9
+    },
+    {
+      "umaban": 8,
+      "waku": 6,
+      "horse_name": "ソリドゥス",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 55.0,
+      "jockey": "秋山 稔樹",
+      "trainer": "安達 昭夫",
+      "score": 39.9,
+      "factor_scores": {
+        "post_zone": 61.1,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 24.4,
+        "trainer": 0.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「中」の当コース勝率 6.8%",
+        "騎手秋山真一は当コース勝率4.3%（複勝率23.4%, 単勝回収率24.0%, N=47）",
+        "調教師安達昭夫は当コース勝率0.0%（単勝回収率0.0%, N=15）"
+      ],
+      "rank": 10
+    },
+    {
+      "umaban": 13,
+      "waku": 8,
+      "horse_name": "ベルヴェール",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 55.0,
+      "jockey": "西村 淳也",
+      "trainer": "石坂 公一",
+      "score": 36.3,
+      "factor_scores": {
+        "post_zone": 0.0,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 47.2,
+        "trainer": 0.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「外」の当コース勝率 5.7%",
+        "騎手西村淳也は当コース勝率8.3%（複勝率18.8%, 単勝回収率52.7%, N=48）",
+        "調教師石坂正は当コース勝率0.0%（単勝回収率0.0%, N=15）"
+      ],
+      "rank": 11
+    },
+    {
+      "umaban": 12,
+      "waku": 8,
+      "horse_name": "ラインエレガント",
+      "sex": "牝",
+      "age": 2,
+      "kinryo": 55.0,
+      "jockey": "吉村 誠之助",
+      "trainer": "牧田 和弥",
+      "score": 35.9,
+      "factor_scores": {
+        "post_zone": 0.0,
+        "style_hint": 50.0,
+        "sex": 0.0,
+        "age": 50.0,
+        "jockey": 31.8,
+        "trainer": 56.3,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「外」の当コース勝率 5.7%",
+        "騎手吉村誠之は当コース勝率5.6%（複勝率16.7%, 単勝回収率41.1%, N=18）",
+        "調教師牧田和弥は当コース勝率13.0%（単勝回収率58.7%, N=23）"
+      ],
+      "rank": 12
+    },
+    {
+      "umaban": 7,
+      "waku": 5,
+      "horse_name": "ノトコンゴウ",
+      "sex": "牡",
+      "age": 2,
+      "kinryo": 55.0,
+      "jockey": "角田 大和",
+      "trainer": "中尾 秀正",
+      "score": 33.6,
+      "factor_scores": {
+        "post_zone": 61.1,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 50.0,
+        "jockey": 0.0,
+        "trainer": 0.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「中」の当コース勝率 6.8%",
+        "騎手角田大和は当コース勝率0.0%（複勝率6.5%, 単勝回収率0.0%, N=31）",
+        "調教師中尾秀正は当コース勝率0.0%（単勝回収率0.0%, N=17）"
+      ],
+      "rank": 13
+    }
+  ]
+}

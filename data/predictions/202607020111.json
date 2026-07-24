@@ -1,0 +1,240 @@
+{
+  "race_id": "202607020111",
+  "generated_at": "2026-07-24T10:37:09",
+  "race_name": "",
+  "surface": "芝",
+  "distance": 1200,
+  "course_key": "shiba1200_A+shiba1200_B(加重平均・要確認)",
+  "start_time": "17:50",
+  "field_size": 8,
+  "disclaimer": "過去データの傾向をルールベースで点数化した参考情報です。実際の着順を保証するものではありません。",
+  "results": [
+    {
+      "umaban": 3,
+      "waku": 3,
+      "horse_name": "ルージュスプリヤ",
+      "sex": "牝",
+      "age": 3,
+      "kinryo": 50.0,
+      "jockey": "森田 誠也",
+      "trainer": "斉藤 崇史",
+      "score": 65.5,
+      "factor_scores": {
+        "post_zone": 100.0,
+        "style_hint": 50.0,
+        "sex": 0.0,
+        "age": 100.0,
+        "jockey": 50.0,
+        "trainer": 100.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「内」の当コース勝率 7.3%",
+        "調教師斉藤崇史は当コース勝率11.8%（単勝回収率68.2%, N=17）"
+      ],
+      "rank": 1
+    },
+    {
+      "umaban": 2,
+      "waku": 2,
+      "horse_name": "ベランジェール",
+      "sex": "牝",
+      "age": 5,
+      "kinryo": 56.0,
+      "jockey": "M.デムーロ",
+      "trainer": "西村 真幸",
+      "score": 56.1,
+      "factor_scores": {
+        "post_zone": 100.0,
+        "style_hint": 50.0,
+        "sex": 0.0,
+        "age": 0.0,
+        "jockey": 50.0,
+        "trainer": 72.9,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「内」の当コース勝率 7.3%",
+        "調教師西村真幸は当コース勝率8.6%（単勝回収率24.3%, N=35）"
+      ],
+      "rank": 2
+    },
+    {
+      "umaban": 7,
+      "waku": 7,
+      "horse_name": "ケールハイム",
+      "sex": "牝",
+      "age": 3,
+      "kinryo": 53.0,
+      "jockey": "坂井 瑠星",
+      "trainer": "福永 祐一",
+      "score": 55.2,
+      "factor_scores": {
+        "post_zone": 0.0,
+        "style_hint": 50.0,
+        "sex": 0.0,
+        "age": 100.0,
+        "jockey": 100.0,
+        "trainer": 50.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「外」の当コース勝率 5.2%",
+        "騎手坂井瑠星は当コース勝率6.1%（複勝率27.3%, 単勝回収率32.4%, N=33）"
+      ],
+      "rank": 3
+    },
+    {
+      "umaban": 1,
+      "waku": 1,
+      "horse_name": "フェブリノ",
+      "sex": "牝",
+      "age": 3,
+      "kinryo": 53.0,
+      "jockey": "松若 風馬",
+      "trainer": "加藤 公太",
+      "score": 54.4,
+      "factor_scores": {
+        "post_zone": 100.0,
+        "style_hint": 50.0,
+        "sex": 0.0,
+        "age": 100.0,
+        "jockey": 67.2,
+        "trainer": 0.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「内」の当コース勝率 7.3%",
+        "騎手松若風馬は当コース勝率4.1%（複勝率20.4%, 単勝回収率34.5%, N=49）",
+        "調教師加藤征弘は当コース勝率0.0%（単勝回収率0.0%, N=5）"
+      ],
+      "rank": 4
+    },
+    {
+      "umaban": 5,
+      "waku": 5,
+      "horse_name": "ニシノトリビュート",
+      "sex": "牡",
+      "age": 3,
+      "kinryo": 54.0,
+      "jockey": "田山 旺佑",
+      "trainer": "新谷 功一",
+      "score": 54.4,
+      "factor_scores": {
+        "post_zone": 95.2,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 100.0,
+        "jockey": 50.0,
+        "trainer": 0.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「中」の当コース勝率 7.2%",
+        "調教師新谷功一は当コース勝率0.0%（単勝回収率0.0%, N=8）"
+      ],
+      "rank": 5
+    },
+    {
+      "umaban": 4,
+      "waku": 4,
+      "horse_name": "アウクソー",
+      "sex": "牝",
+      "age": 6,
+      "kinryo": 56.0,
+      "jockey": "秋山 稔樹",
+      "trainer": "平田 修",
+      "score": 48.1,
+      "factor_scores": {
+        "post_zone": 95.2,
+        "style_hint": 50.0,
+        "sex": 0.0,
+        "age": 0.0,
+        "jockey": 65.6,
+        "trainer": 0.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「中」の当コース勝率 7.2%",
+        "騎手秋山真一は当コース勝率4.0%（複勝率28.0%, 単勝回収率236.4%, N=25）",
+        "調教師平田修は当コース勝率0.0%（単勝回収率0.0%, N=9）"
+      ],
+      "rank": 6
+    },
+    {
+      "umaban": 8,
+      "waku": 8,
+      "horse_name": "ビーグラッド",
+      "sex": "牝",
+      "age": 5,
+      "kinryo": 56.0,
+      "jockey": "幸 英明",
+      "trainer": "岡田 稲男",
+      "score": 29.3,
+      "factor_scores": {
+        "post_zone": 0.0,
+        "style_hint": 50.0,
+        "sex": 0.0,
+        "age": 0.0,
+        "jockey": 50.0,
+        "trainer": 0.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「外」の当コース勝率 5.2%",
+        "調教師岡田稲男は当コース勝率0.0%（単勝回収率0.0%, N=5）"
+      ],
+      "rank": 7
+    },
+    {
+      "umaban": 6,
+      "waku": 6,
+      "horse_name": "サヨノパララックス",
+      "sex": "牡",
+      "age": 3,
+      "kinryo": 55.0,
+      "jockey": "菱田 裕二",
+      "trainer": "羽月 友彦",
+      "score": 26.7,
+      "factor_scores": {
+        "post_zone": 0.0,
+        "style_hint": 50.0,
+        "sex": 100.0,
+        "age": 100.0,
+        "jockey": 0.0,
+        "trainer": 0.0,
+        "interval": 50.0,
+        "distance_change": 50.0,
+        "sire": 50.0,
+        "prev_agari": 50.0
+      },
+      "reasoning": [
+        "馬番ゾーン「外」の当コース勝率 5.2%",
+        "騎手菱田裕二は当コース勝率0.0%（複勝率5.3%, 単勝回収率0.0%, N=38）",
+        "調教師羽月友彦は当コース勝率0.0%（単勝回収率0.0%, N=5）"
+      ],
+      "rank": 8
+    }
+  ]
+}

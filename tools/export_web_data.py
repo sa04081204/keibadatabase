@@ -20,7 +20,13 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 from analyze_chukyo import (  # noqa: E402
     classify_style, summarize, entity_ranking, valid_starters, build_crosses, enrich, MIN_RACES_WARN,
+    PREV_AGARI_CATEGORIES, prev_agari_bucket_and_bins, rate_table,
 )
+
+EMPTY_PREV_AGARI_TABLE = {
+    c: {"n": 0, "win_pct": None, "place_pct": None, "win_roi": None, "place_roi": None}
+    for c in PREV_AGARI_CATEGORIES
+}
 
 RANKING_MIN_N = 3  # サーバー側では緩めに絞り、UI側でさらに絞れるようにする
 CROSS_MIN_N = 20   # クロス条件の「狙い目/軽視」判定に使う最低サンプル数
@@ -218,12 +224,18 @@ def main():
         mask = (df["surface"] == surface) & (df["distance"] == distance)
         mask &= df["course_variant"].isna() if not variant else (df["course_variant"] == variant)
         dfc = df[mask]
+        prev_agari_cat, prev_agari_bins = prev_agari_bucket_and_bins(dfc)
+        dfc = dfc.assign(prev_agari_band=prev_agari_cat)
         dfs = dfc[dfc["is_summer"] == 1]
         dfo = dfc[dfc["is_summer"] == 0]
 
         overall = summarize(dfc)
         summer = summarize(dfs)
         other = summarize(dfo)
+        prev_agari_table = (
+            rate_table(valid_starters(dfc), "prev_agari_band", PREV_AGARI_CATEGORIES)
+            if prev_agari_bins else EMPTY_PREV_AGARI_TABLE
+        )
         crosses = build_crosses(dfc)
         takeaway = build_takeaway(overall, summer, other, crosses)
 
@@ -252,6 +264,8 @@ def main():
             "distance_change": overall["distance_change"],
             "interval": overall["interval"],
             "chukyo_experience": overall["chukyo_experience"],
+            "prev_agari": prev_agari_table,
+            "prev_agari_bins": prev_agari_bins,  # [境界値1, 境界値2] 秒。predict_race.pyが新しい馬の分類に使う
             "crosses": crosses,
             "rpci": {"overall": overall["rpci_avg"], "summer": summer["rpci_avg"], "other": other["rpci_avg"]},
             "time_by_cond": overall["time_by_cond"],

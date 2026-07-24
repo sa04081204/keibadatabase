@@ -81,6 +81,7 @@ AGE_CATEGORIES = ["2歳", "3歳", "4歳", "5歳以上"]
 DISTANCE_CHANGE_CATEGORIES = ["延長(201m以上)", "延長(1-200m)", "同距離", "短縮(1-200m)", "短縮(201m以上)"]
 INTERVAL_CATEGORIES = ["連闘(中0週)", "中1-2週", "中3-5週", "中6-9週", "中10週以上(休み明け)"]
 CHUKYO_EXPERIENCE_CATEGORIES = ["中京経験あり", "中京初挑戦"]
+PREV_AGARI_CATEGORIES = ["上がり速いタイプ(上位33%)", "平均的", "上がり遅いタイプ(下位33%)"]
 
 
 def bucket_distance_change(cur_dist, prev_dist):
@@ -150,6 +151,31 @@ def bucket_age(age):
     if a == 4:
         return "4歳"
     return "5歳以上"
+
+
+def prev_agari_bucket_and_bins(dfc: pd.DataFrame):
+    """dfc(1コース分)のprev_last3f(前走の上がり3Fタイム)を3分位に分割する。
+    ※これは「前走時点で既に分かっている値」なので出走前の特徴量として使ってよい。
+    　当該レース結果から作るagari_bucket(上がり1位/2位…)とは違いデータリークにならない。
+    サンプル不足(有効値30件未満)やタイムがほぼ同一で分位点が作れない場合は
+    (全てNoneのSeries, None)を返し、呼び出し側で「この項目は使わない」扱いにする。
+    bin_edges(3分位の境界値、2個)はcourses.jsonに保存し、predict_race.py側で
+    新しい馬のprev_last3fを同じ基準で分類するのに使う。"""
+    valid = dfc["prev_last3f"].dropna()
+    if len(valid) < 30:
+        return pd.Series([None] * len(dfc), index=dfc.index, dtype=object), None
+    try:
+        cats, bins = pd.qcut(
+            dfc["prev_last3f"], 3, labels=PREV_AGARI_CATEGORIES, retbins=True, duplicates="drop"
+        )
+    except ValueError:
+        return pd.Series([None] * len(dfc), index=dfc.index, dtype=object), None
+    if len(bins) - 1 != 3:
+        # duplicatesで分位点が潰れて3分割できなかった場合は無効値扱いにする
+        return pd.Series([None] * len(dfc), index=dfc.index, dtype=object), None
+    cats = cats.astype(object)
+    cats[dfc["prev_last3f"].isna()] = None
+    return cats, [round(float(b), 2) for b in bins]
 
 
 def enrich(df: pd.DataFrame) -> pd.DataFrame:
