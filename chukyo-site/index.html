@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>中京競馬 攻略ボード</title>
+<meta name="description" content="中京競馬場のコース別データ分析。馬番・脚質・ペース傾向、夏競馬(6-8月)の特徴をまとめた攻略ボード。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css?v=10">
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">CHUKYO RACECOURSE DATA BOARD</span>
+  <h1>中京競馬<br>コース攻略ボード</h1>
+  <div class="ticker" id="ticker">
+    <span class="ticker-inner"><span class="dot"></span>データ読込中…</span>
+  </div>
+</header>
+
+<main>
+  <section id="tab-overview">
+    <div class="filter-row">
+      <button class="chip-toggle active" data-surface="all">すべて</button>
+      <button class="chip-toggle" data-surface="芝">芝</button>
+      <button class="chip-toggle" data-surface="ダ">ダート</button>
+      <input class="searchbox" id="course-search" placeholder="距離で検索 例:1600">
+    </div>
+    <div class="course-grid" id="course-list">
+      <div class="loading-note">読み込み中…</div>
+    </div>
+  </section>
+
+  <section id="tab-ranking" hidden>
+    <div class="search-controls">
+      <select id="rk-course">
+        <option value="ALL">全コース通算</option>
+      </select>
+      <div class="filter-grid">
+        <select id="rk-type">
+          <option value="jockey">騎手</option>
+          <option value="trainer">調教師</option>
+          <option value="sire">種牡馬</option>
+        </select>
+        <select id="rk-sort">
+          <option value="win_pct">勝率順</option>
+          <option value="place_pct">複勝率順</option>
+          <option value="win_roi">単勝回収率順</option>
+          <option value="place_roi">複勝回収率順</option>
+          <option value="n">騎乗数順</option>
+        </select>
+        <select id="rk-minn">
+          <option value="5">最低5走以上</option>
+          <option value="10" selected>最低10走以上</option>
+          <option value="20">最低20走以上</option>
+          <option value="30">最低30走以上</option>
+          <option value="50">最低50走以上</option>
+        </select>
+      </div>
+    </div>
+    <div class="search-summary" id="rk-summary"></div>
+    <p class="empty-note" style="padding:6px 2px; text-align:left;">※回収率は単勝/複勝100円払い戻しベースの過去実績です。サンプル数が少ない条件は偶然の影響が大きいので「最低○走以上」を上げて確認してください。</p>
+    <div class="entry-list" id="rk-results"></div>
+  </section>
+
+  <section id="tab-predict" hidden>
+    <div class="search-controls">
+      <select id="pr-race">
+        <option value="">予想レースを選択してください</option>
+      </select>
+    </div>
+    <p class="empty-note" style="padding:6px 2px; text-align:left;" id="pr-disclaimer"></p>
+    <div id="pr-result"></div>
+  </section>
+
+  <section id="tab-search" hidden>
+    <div class="search-controls">
+      <select id="sel-course"><option value="">コースを選択してください</option></select>
+      <div class="filter-grid">
+        <select id="sel-season">
+          <option value="all">季節：すべて</option>
+          <option value="summer">夏(6-8月)のみ</option>
+          <option value="other">夏以外</option>
+        </select>
+        <select id="sel-cond">
+          <option value="all">馬場：すべて</option>
+          <option value="良">良</option>
+          <option value="稍重">稍重</option>
+          <option value="重">重</option>
+          <option value="不良">不良</option>
+        </select>
+        <select id="sel-zone">
+          <option value="all">馬番ゾーン：すべて</option>
+          <option value="内">内</option>
+          <option value="中">中</option>
+          <option value="外">外</option>
+        </select>
+        <select id="sel-style">
+          <option value="all">脚質：すべて</option>
+          <option value="逃げ">逃げ</option>
+          <option value="先行">先行</option>
+          <option value="差し">差し</option>
+          <option value="追込">追込</option>
+        </select>
+      </div>
+      <input id="sel-keyword" placeholder="馬名・騎手・レース名で検索">
+    </div>
+    <div class="search-summary" id="search-summary"></div>
+    <div class="entry-list" id="search-results"></div>
+    <button class="more-btn" id="more-btn" hidden>もっと見る</button>
+  </section>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="sheet" id="modal-sheet"></div>
+</div>
+
+<nav class="tabbar">
+  <button data-tab="overview" class="active"><span class="ic">&#9678;</span>コース一覧</button>
+  <button data-tab="ranking"><span class="ic">&#9873;</span>ランキング</button>
+  <button data-tab="search"><span class="ic">&#9737;</span>データ検索</button>
+  <button data-tab="predict"><span class="ic">&#9889;</span>AI予想</button>
+</nav>
+
+<script src="assets/app.js?v=10"></script>
+</body>
+</html>
